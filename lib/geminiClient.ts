@@ -1,7 +1,7 @@
 import type { GeminiResponse, SkillComparisonResult } from "@/types";
 
 const GEMINI_ENDPOINT =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent";
 
 /**
  * Low-level call to the Gemini API. Runs entirely client-side using the
