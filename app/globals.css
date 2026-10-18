@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-slate-200;
+  }
+  body {
+    @apply min-h-screen bg-[#0d1017] font-sans text-slate-100 antialiased;
+  }
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+  input,
+  textarea {
+    @apply text-slate-100 placeholder:text-slate-500;
+  }
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  a:focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2;
+  }
+}
+
+@layer utilities {
+  body .bg-white {
+    background-color: #171b25 !important;
+  }
+  body .bg-slate-50 {
+    background-color: #10141d !important;
+  }
+  body .bg-brand-50 {
+    background-color: #1e2240 !important;
+  }
+  body .bg-accent-50 {
+    background-color: #3a211e !important;
+  }
+  body .bg-amber-50 {
+    background-color: #312716 !important;
+  }
+  body .border,
+  body .border-t,
+  body hr {
+    border-color: #303848 !important;
+  }
+  body .border-slate-200 {
+    border-color: #303848 !important;
+  }
+  body .border-emerald-300 {
+    border-color: #1d7957 !important;
+  }
+  body .border-amber-300 {
+    border-color: #8c6a1d !important;
+  }
+  body .text-slate-900 {
+    color: #f4f7fb !important;
+  }
+  body .text-slate-700 {
+    color: #d8deea !important;
+  }
+  body .text-slate-600 {
+    color: #aeb8c9 !important;
+  }
+  body .text-slate-500 {
+    color: #8d99ac !important;
+  }
+  body .text-slate-400 {
+    color: #718096 !important;
+  }
+  body .text-emerald-700 {
+    color: #6ee7b7 !important;
+  }
+  body .text-amber-900 {
+    color: #fcd34d !important;
+  }
+  body .hover\:bg-slate-50:hover {
+    background-color: #242b38 !important;
+  }
+  body .hover\:bg-brand-50:hover {
+    background-color: #282d56 !important;
+  }
+  body .hover\:text-slate-900:hover {
+    color: #ffffff !important;
+  }
+}
