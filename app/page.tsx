@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import ApiKeyPanel from "@/components/ApiKeyPanel";
+import LoadingState from "@/components/LoadingState";
 import Navbar from "@/components/Navbar";
 import SkillsComparisonPanel from "@/components/SkillsComparisonPanel";
 import StatusAlert from "@/components/StatusAlert";
@@ -38,8 +39,8 @@ export default function Home() {
   const [error, setError] = useState("");
   const comparing = stage === "comparing";
   const tailoring = stage === "tailoring";
-  const canCompare =
-    Boolean(resume.trim() && jobDescription.trim()) && !tailoring;
+  const isBusy = comparing || tailoring;
+  const canCompare = Boolean(resume.trim() && jobDescription.trim()) && !isBusy;
   const toggleSkill = (skill: string) =>
     setSelectedSkills((previous) => {
       const next = new Set(previous);
@@ -47,6 +48,10 @@ export default function Home() {
       return next;
     });
   const compare = async () => {
+    if (!apiKey.trim()) {
+      setError("Add and save your Gemini API key before comparing. Your key stays in this browser.");
+      return;
+    }
     setError("");
     setTailoredLatex("");
     setStage("comparing");
@@ -65,6 +70,10 @@ export default function Home() {
     }
   };
   const tailor = async () => {
+    if (!apiKey.trim()) {
+      setError("Your Gemini API key is missing. Add it in the connection panel, then try again.");
+      return;
+    }
     setError("");
     setStage("tailoring");
     try {
@@ -128,8 +137,16 @@ export default function Home() {
           </p>
         </header>
         <ApiKeyPanel apiKey={apiKey} onSave={setApiKey} />
-        <StatusAlert message={error} severity="error" />
-        <StatusAlert message={status} severity="info" />
+        <StatusAlert
+          message={error}
+          severity="error"
+          onDismiss={() => setError("")}
+          action={
+            error && !isBusy
+              ? { label: "Try again", onClick: comparison ? tailor : compare }
+              : undefined
+          }
+        />
         <section>
           <h2 className="text-lg font-semibold">1. Add your source material</h2>
           <p className="mb-5 mt-1 text-sm text-slate-600">
@@ -145,6 +162,7 @@ export default function Home() {
               onChange={setResume}
               placeholder="Paste your LaTeX resume source here, or upload a .tex file…"
               acceptedFileTypes=".tex"
+              disabled={isBusy}
             />
             <TextInputPanel
               title="Target job description"
@@ -154,6 +172,7 @@ export default function Home() {
               onChange={setJobDescription}
               placeholder="Paste the job description here, or upload a text file…"
               acceptedFileTypes=".txt"
+              disabled={isBusy}
             />
           </div>
         </section>
@@ -173,6 +192,12 @@ export default function Home() {
             {comparing ? "Comparing skills…" : "Compare skills"}
           </button>
         </section>
+        {comparing && (
+          <LoadingState
+            title="Comparing your experience"
+            description="We’re identifying role-relevant evidence and gaps. This usually takes a few moments—please keep this page open."
+          />
+        )}
         {comparison && (
           <>
             <hr />
@@ -186,6 +211,7 @@ export default function Home() {
                 result={comparison}
                 selected={selectedSkills}
                 onToggle={toggleSkill}
+                disabled={isBusy}
               />
             </section>
             <section className="flex flex-wrap items-center justify-between gap-4 rounded-xl bg-accent-50 p-4">
@@ -196,7 +222,7 @@ export default function Home() {
               <button
                 type="button"
                 className={`${button} bg-accent-500 hover:bg-accent-700`}
-                disabled={tailoring}
+                disabled={isBusy}
                 onClick={tailor}
               >
                 <WandSparkles size={18} />
@@ -205,6 +231,12 @@ export default function Home() {
                   : "Generate tailored resume"}
               </button>
             </section>
+            {tailoring && (
+              <LoadingState
+                title="Tailoring your resume"
+                description="We’re preserving your LaTeX structure while strengthening evidence-backed wording for this role."
+              />
+            )}
           </>
         )}
         {tailoredLatex && (

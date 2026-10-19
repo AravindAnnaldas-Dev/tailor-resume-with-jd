@@ -3,6 +3,14 @@ import type { GeminiResponse, SkillComparisonResult } from "@/types";
 const GEMINI_ENDPOINT =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent";
 
+interface GeminiApiPayload {
+  error?: { message?: string };
+  candidates?: Array<{
+    content?: { parts?: Array<{ text?: string }> };
+    finishReason?: string;
+  }>;
+}
+
 /**
  * Low-level call to the Gemini API. Runs entirely client-side using the
  * user's own API key — nothing passes through any server of ours.
@@ -18,24 +26,45 @@ export async function callGemini(
     );
   }
 
-  const res = await fetch(GEMINI_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-goog-api-key": apiKey,
-    },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      // A low temperature is important here: this is an editing and
-      // evidence-matching task, not a creative-writing task.
-      generationConfig: { maxOutputTokens, temperature: 0.2 },
-    }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(GEMINI_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens, temperature: 0.2 },
+      }),
+    });
+  } catch {
+    throw new Error(
+      "We couldn’t reach Google Gemini. Check your internet connection, then try again.",
+    );
+  }
 
-  const data = await res.json();
+  let data: GeminiApiPayload;
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error(
+      "Google returned an unreadable response. Check your connection and try again.",
+    );
+  }
 
-  if (data.error) {
-    throw new Error(data.error.message || "The Gemini API returned an error.");
+  if (!res.ok || data.error) {
+    if (res.status === 400 || res.status === 401 || res.status === 403) {
+      throw new Error("Gemini couldn’t verify this API key. Check it in the connection panel and try again.");
+    }
+    if (res.status === 429) {
+      throw new Error("Gemini is receiving too many requests right now. Please wait a moment, then try again.");
+    }
+    if (res.status >= 500) {
+      throw new Error("Gemini is temporarily unavailable. Your work is safe—please try again shortly.");
+    }
+    throw new Error(data.error?.message || "Gemini couldn’t complete that request. Please try again.");
   }
 
   const candidate = (data.candidates || [])[0];

@@ -87,3 +87,13 @@
     color: #ffffff !important;
   }
 }
+
+@keyframes loading {
+  0%,
+  100% {
+    transform: translateX(-55%);
+  }
+  50% {
+    transform: translateX(55%);
+  }
+}

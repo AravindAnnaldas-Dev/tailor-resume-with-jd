@@ -7,12 +7,14 @@ interface SkillsComparisonPanelProps {
   result: SkillComparisonResult;
   selected: Set<string>;
   onToggle: (skill: string) => void;
+  disabled?: boolean;
 }
 
 export default function SkillsComparisonPanel({
   result,
   selected,
   onToggle,
+  disabled = false,
 }: SkillsComparisonPanelProps) {
   const skills = (items: string[], tone: "brand" | "accent") =>
     items.length ? (
@@ -21,8 +23,9 @@ export default function SkillsComparisonPanel({
           type="button"
           key={skill}
           onClick={() => onToggle(skill)}
+          disabled={disabled}
           aria-pressed={selected.has(skill)}
-          className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${selected.has(skill) ? (tone === "brand" ? "border-brand-500 bg-brand-500 text-white" : "border-accent-500 bg-accent-500 text-white") : "bg-white text-slate-700 hover:border-slate-400"}`}
+          className={`rounded-full border px-3 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${selected.has(skill) ? (tone === "brand" ? "border-brand-500 bg-brand-500 text-white" : "border-accent-500 bg-accent-500 text-white") : "bg-white text-slate-700 hover:border-slate-400"}`}
         >
           {skill}
         </button>
